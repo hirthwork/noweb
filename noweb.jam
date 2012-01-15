@@ -4,7 +4,7 @@ import type ;
 import toolset ;
 
 feature.feature chunk : : free ;
-feature.feature chunk-type : c cpp : free ;
+feature.feature chunk-type : c cpp ;
 feature.feature delay : off on : free ;
 
 type.register NW : nw ;
