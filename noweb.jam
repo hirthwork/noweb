@@ -1,35 +1,34 @@
-import feature ;
-import generators ;
-import type ;
-import toolset ;
+import feature : feature ;
+import generators : register-standard ;
+import type : register ;
+import toolset : flags ;
 
-feature.feature chunk : : free ;
-feature.feature chunk-type : c cpp ;
-feature.feature delay : off on : free ;
+feature chunk : : free ;
+feature chunk-type : c cpp tex ;
+feature delay : off on : free ;
+feature autodefs : : free ;
 
-type.register NW : nw ;
-type.register TEX : tex ;
+register NW : nw ;
+register TEX : tex ;
 
-generators.register-standard noweb.make-c : NW : C : <chunk-type>c ;
-generators.register-standard noweb.make-cpp : NW : CPP : <chunk-type>cpp ;
-generators.register-standard noweb.make-tex : NW : TEX ;
+register-standard noweb.notangle : NW : C : <chunk-type>c ;
+register-standard noweb.notangle : NW : CPP : <chunk-type>cpp ;
+register-standard noweb.notangle : NW : TEX : <chunk-type>tex ;
+register-standard noweb.noweave : NW : TEX ;
 
-toolset.flags noweb.make-c CHUNKS <chunk> ;
-toolset.flags noweb.make-cpp CHUNKS <chunk> ;
-toolset.flags noweb.make-tex OPTIONS <delay>on : -delay ;
+flags noweb.notangle CHUNKS <chunk> ;
+flags noweb.noweave OPTIONS <delay>on : -delay ;
+flags noweb.noweave AUTODEFS <autodefs> ;
 
-actions make-c
+actions notangle
 {
     notangle -R$(CHUNKS) $(>) | cpif $(<)
 }
 
-actions make-cpp
+BEGIN = "-autodefs " ;
+END = " -index" ;
+actions noweave
 {
-    notangle -R$(CHUNKS) $(>) | cpif $(<)
-}
-
-actions make-tex
-{
-    noweave $(OPTIONS) $(>) | cpif $(<)
+    noweave $(BEGIN)$(AUTODEFS)$(END) $(OPTIONS) $(>) | cpif $(<)
 }
 
