@@ -1,24 +1,68 @@
-import feature : feature ;
-import generators : register-standard ;
-import type : register ;
-import toolset : flags ;
+# noweb.jam                 -- noweb documentation and source generator
+#
+# Copyright (C) 2012 Dmitry Potapov <potapov.d@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-feature chunk : : free ;
-feature chunk-type : c cpp tex ;
-feature delay : off on : free ;
-feature autodefs : : free ;
+import feature ;
+import generators ;
+import type ;
+import toolset ;
+import "class" : new ;
 
-register NW : nw ;
-register TEX : tex ;
+class noweb-generator : generator
+{
+    import sequence ;
+    rule __init__ ( * : * )
+    {
+        generator.__init__
+            $(1) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
+    }
 
-register-standard noweb.notangle : NW : C : <chunk-type>c ;
-register-standard noweb.notangle : NW : CPP : <chunk-type>cpp ;
-register-standard noweb.notangle : NW : TEX : <chunk-type>tex ;
-register-standard noweb.noweave : NW : TEX ;
+    rule generated-targets ( sources + : property-set : project name ? )
+    {
+        if ! $(name)
+        {
+            local chunks = [ sequence.join [ $(sources).name ]
+                [ $(property-set).get <chunk> ] : . ] ;
 
-flags noweb.notangle CHUNKS <chunk> ;
-flags noweb.noweave OPTIONS <delay>on : -delay ;
-flags noweb.noweave AUTODEFS <autodefs> ;
+            name = [ determine-target-name $(chunks) ] ;
+        }
+        return [ generator.generated-targets $(sources) : $(property-set)
+            : $(project) $(name) ] ;
+    }
+}
+
+feature.feature chunk : : free ;
+feature.feature chunk-type : c cpp tex ;
+feature.feature delay : off on : free ;
+feature.feature autodefs : : free ;
+
+type.register NW : nw ;
+type.register TEX : tex ;
+
+generators.register
+    [ new noweb-generator noweb.notangle : NW : C : <chunk-type>c ] ;
+generators.register
+    [ new noweb-generator noweb.notangle : NW : CPP : <chunk-type>cpp ] ;
+generators.register
+    [ new noweb-generator noweb.notangle : NW : TEX : <chunk-type>tex ] ;
+generators.register-standard noweb.noweave : NW : TEX ;
+
+toolset.flags noweb.notangle CHUNKS <chunk> ;
+toolset.flags noweb.noweave OPTIONS <delay>on : -delay ;
+toolset.flags noweb.noweave AUTODEFS <autodefs> ;
 
 actions notangle
 {
